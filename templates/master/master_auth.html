@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>DAON 도서대여</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='copy.css') }}">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <style>
+        th {text-align: center;}
+        td {text-align: center;}
+    </style>
+</head>
+<body>
+<!-- 네비게이션바 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Daon</a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if session.get('user') %}
+                <li class="nav-item">
+                    <span class="nav-link">{{ session.get('user') }}<a href="{{ url_for('auth.logout') }}" style="text-decoration: none; color: inherit;">(로그아웃)</a></span>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">로그인</a>
+                </li>
+                {% endif %}
+                    
+            </ul>
+        </div>
+        
+    </div>
+</nav>
+
+<div class="btn-group">
+    <button type="button" class="btn btn-primary" onclick="location.href='/master/cart'">장바구니 관리</button>
+    <button type="button" class="btn btn-primary" onclick="location.href='/master/auth'">회원 관리</button>
+    <button type="button" class="btn btn-primary" onclick="location.href='/master/pum'">상품 관리</button>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="float-right mt-4">
+        <form action="/auth/signup" method="get">
+            <button type="submit" class="btn btn-outline-primary float-right mt-4">회원등록</button>
+        </form>
+    <div class="d-flex justify-content-end mb-3">
+        <form action="{{ url_for('master.auth') }}" method="GET" class="form-inline">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="이름, ID, 휴대폰 검색..." value="{{ search }}">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+    <table class="table">
+        <thead class="table-info">
+            <tr>
+                <th>회원번호</th>
+                <th>이름</th>
+                <th>ID</th>
+                <th>Email</th>
+                <th>전화번호</th>
+                <th>가입날짜</th>
+                <th>편집</th>
+            </tr>
+        </thead>            
+    <tbody>
+              {% for user in user %}
+              <tr>
+                  <td>{{ user[0] }}</td> 
+                  <td>{{ user[7] }}</td>
+                  <td>{{ user[1] }}</td>  
+                  <td>{{ user[4] }}</td> 
+                  <td>{{ user[5] }}</td> 
+                  <td>{{ user[6] }}</td>
+                  <td>
+                    <!-- 수정 버튼 추가 -->
+                    <div class="btn-group">
+                        <a href="{{ url_for('auth.admin_edit_user', username=user[1]) }}" class="btn btn-sm btn-warning">수정</a>
+                        <!-- 삭제 버튼 부분 -->
+                        <form method="POST" action="{{ url_for('master.auth') }}" style="display: inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+                        </form>
+                    </div>
+                </td>
+              </tr>
+              {% endfor %}
+    </tbody>
+    </table>
+</div>
+<div>
+<!-- 페이징네이션 --> 
+<ul class="pagination justify-content-center" id="home-pagination">
+    {% if page > 1 %}
+<li class="page-item">
+    <a class="page-link" href="{{ url_for('master.auth', page=page-1) }}">이전</a>
+</li>
+{% endif %}
+{% for p in range(1, total_pages + 1) %}
+<li class="page-item {% if p == page %} active {% endif %}">
+    <a class="page-link" href="{{ url_for('master.auth', page=p) }}">{{ p }}</a>
+</li>
+{% endfor %}
+{% if page < total_pages %}
+<li class="page-item">
+    <a class="page-link" href="{{ url_for('master.auth', page=page+1) }}">다음</a>
+</li>
+{% endif %}
+</ul>
+</div>
+
+
+<div>
+    <footer class="footer_copy text-center">
+        <br>
+        <p>copyright 2024. &copy; Daon</p>
+        <br>
+        <p>김미경. 천종일. 하연우. 이기성. 이한세. 김민석. 배휘호</p>
+    </footer>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
+</body>
+</html>

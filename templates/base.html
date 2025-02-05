@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>DAON 도서대여</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='copy.css') }}">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <style>
+        th {text-align: center;}
+        td {text-align: center;}
+    </style>    
+    
+</head>
+<body>
+<!-- 네비게이션바 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Daon</a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if session.get('user') %}
+                <li class="nav-item">
+                    <span class="nav-link">{{ session.get('user') }}<a href="{{ url_for('auth.logout') }}" style="text-decoration: none; color: inherit;">(로그아웃)</a></span>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">로그인</a>
+                </li>
+                {% endif %}
+                {% if session.get('user') %}
+                <ul class="navbar-nav ms-auto me-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('master.master_cart') }}">내장바구니</a>
+                    </li>
+                </ul>
+                {% endif %}    
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 기본 템플릿 안에 삽입될 내용 Start -->
+{% block content %}
+{% endblock %}
+
+<div>
+    <footer class="footer_copy text-center">
+        <br>
+        <p>copyright 2024. &copy; Daon</p>
+        <br>
+        <p>김미경. 천종일. 하연우. 이기성. 이한세. 김민석. 배휘호</p>
+    </footer>
+</div>
+
+<!-- 기본 템플릿 안에 삽입될 내용 End -->
+
+<!-- Bootstrap JS -->
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Info</title>
+        <!-- jQuery 추가 -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='copy.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: block;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .main-content {
+            margin-top: 37.5px;
+        }
+        .info-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            margin: 0 auto;
+            position: relative;
+            top: 12.5px;
+        }
+        .info-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-inline {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .btn-small {
+            width: 20%;
+            padding: 8px;
+            font-size: 0.8em;
+            background-color: #6c757d;
+            border-radius: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-small:hover {
+            background-color: #5a6268;
+        }
+        .btn {
+            width: 30%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #007BFF;
+        }
+        .btn-secondary:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .footer_copy {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        /* 네비바 Search 버튼 스타일 */
+        .navbar .btn-secondary {
+            background-color: #6c757d !important;  /* 회색으로 변경 */
+            color: black;
+        }
+        .navbar .btn-secondary:hover {
+            background-color: #5a6268 !important;  /* hover 시 더 어두운 회색 */
+        }
+        
+        /* 내정보 페이지의 btn-secondary는 기존 색상 유지 */
+        .button-group .btn-secondary {
+            background-color: #007BFF;
+        }
+        .button-group .btn-secondary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    
+    
+    <!-- Navigation bar -->
+    {% include 'navbar.html' %}
+
+    <div class="main-content">
+        <div class="container">
+            <div class="info-container">
+                <h2>내 정보</h2>
+                <form id="myInfoForm" action="/auth/myinfo" method="POST">
+                    <input type="hidden" id="mode" name="mode" value="{{ mode }}">
+
+                    <!-- 사용자 정보 -->
+                    <div class="form-group">
+                        <label for="erum">이름</label>
+                        <input type="text" id="erum" name="erum" value="{{ user.erum }}" {{ 'readonly' if mode == 'info' }}>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">ID</label>
+                        <input type="text" id="username" name="username" value="{{ user.username }}" readonly>
+                    </div>
+
+                    <!-- 비밀번호 -->
+                    <div class="form-group">
+                        <label for="password1">비밀번호</label>
+                        <div class="form-inline">
+                            <input type="password" id="password1" name="password1" 
+                                   placeholder="{{ '영문자+숫자, 8~20자' if mode == 'password' else '' }}"
+                                   value="{{ '' if mode == 'password' else '************' }}"
+                                   {{ 'readonly' if mode != 'password' }}>
+                            {% if mode == 'edit' %}
+                                <button type="button" class="btn-small" onclick="enterPasswordMode()">변경</button>
+                            {% elif mode == 'password' %}
+                                <button type="submit" class="btn-small" onclick="return confirmPasswordChange()">확인</button>
+                            {% endif %}
+                        </div>
+                        <div class="invalid-feedback" style="display: none;"></div>
+                    </div>
+
+                    <!-- 비밀번호 확인 (비밀번호 변경 모드에서만 표시) -->
+                    {% if mode == 'password' %}
+                    <div class="form-group">
+                        <label for="password2">비밀번호 확인</label>
+                        <input type="password" id="password2" name="password2">
+                        <div class="invalid-feedback" style="display: none;"></div>
+                    </div>
+                    {% endif %}
+
+                    <!-- 이메일 -->
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" {{ 'readonly' if mode == 'info' }}>
+                        <div class="invalid-feedback" style="display: none;"></div>
+                    </div>
+
+                    <!-- 휴대폰번호 -->
+                    <div class="form-group">
+                        <label for="phone">휴대폰번호</label>
+                        <input type="text" id="phone" name="phone" value="{{ user.phone }}" {{ 'readonly' if mode == 'info' }}>
+                        <div class="invalid-feedback" style="display: none;"></div>
+                    </div>
+                    <div style="margin-bottom: 10px;"></div>
+
+                    <!-- 버튼 -->
+                    {% if mode == 'info' %}
+                    <div class="button-group">
+                        <button type="button" class="btn" onclick="enterEditMode()">정보수정</button>
+                        <button type="button" class="btn" onclick="confirmDelete()">회원탈퇴</button>
+                        <button type="button" class="btn" onclick="logout()">로그아웃</button>
+                    </div>
+                    {% elif mode == 'edit' %}
+                    <div class="button-group">
+                        <button type="submit" class="btn" onclick="return confirm('정보를 수정하시겠습니까?')">수정 확인</button>
+                        <button type="button" class="btn" onclick="cancelEdit()">취소</button>
+                    </div>
+                    {% elif mode == 'password' %}
+                    <div class="button-group">
+                        <button type="submit" class="btn" onclick="return confirmPasswordChange()">확인</button>
+                        <button type="button" class="btn" onclick="cancelPasswordChange()">취소</button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // 중복 체크 함수
+            function checkDuplicate(field) {
+                var value = $('#' + field).val();
+                var currentUsername = '{{ user.username }}';  // 현재 사용자의 username
+                
+                $.ajax({
+                    url: "{{ url_for('auth.check_duplicate') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        field: field,
+                        value: value,
+                        current_username: currentUsername
+                    }),
+                    success: function(response) {
+                        var $feedback = $('#' + field).next('.invalid-feedback');
+                        if (response.duplicate) {
+                            $feedback.text('이미 사용 중입니다.').show();
+                            $('#' + field).addClass('is-invalid');
+                        } else {
+                            $feedback.hide();
+                            $('#' + field).removeClass('is-invalid');
+                        }
+                    }
+                });
+            }
+
+            // 비밀번호 유효성 검사 함수
+            function validatePassword(password) {
+                return password.length >= 8 && 
+                       password.length <= 20 && 
+                       /[a-zA-Z]/.test(password) && 
+                       /[0-9]/.test(password);
+            }
+
+            // 비밀번호 실시간 확인 함수
+            function checkPassword() {
+                var password1 = $('#password1').val();
+                var password2 = $('#password2').val();
+                var $feedback1 = $('#password1').next('.invalid-feedback');
+                var $feedback2 = $('#password2').next('.invalid-feedback');
+
+                // 첫 번째 비밀번호 유효성 검사
+                if (password1) {
+                    if (!validatePassword(password1)) {
+                        $feedback1.text('비밀번호는 영문+숫자 조합으로 8~20자 사이여야 합니다.').show();
+                        $('#password1').addClass('is-invalid');
+                    } else {
+                        $feedback1.hide();
+                        $('#password1').removeClass('is-invalid');
+                    }
+                }
+
+                // 두 번째 비밀번호 일치 여부 확인
+                if (password2) {
+                    if (password1 !== password2) {
+                        $feedback2.text('비밀번호가 일치하지 않습니다.').show();
+                        $('#password2').addClass('is-invalid');
+                    } else {
+                        $feedback2.hide();
+                        $('#password2').removeClass('is-invalid');
+                    }
+                }
+            }
+
+            // 수정 모드에서만 실시간 중복 체크 활성화
+            if ('{{ mode }}' === 'edit') {
+                $('#email, #phone').on('blur', function() {
+                    checkDuplicate($(this).attr('id'));
+                });
+            }
+
+            // 비밀번호 변경 모드에서 실시간 확인 활성화
+            if ('{{ mode }}' === 'password') {
+                $('#password1, #password2').on('input', function() {
+                    checkPassword();
+                });
+            }
+        });
+
+        function enterEditMode() {
+            window.location.href = '/auth/myinfo?mode=edit';
+        }
+
+        function enterPasswordMode() {
+            document.getElementById('mode').value = 'password';
+            document.getElementById('myInfoForm').submit();
+        }
+
+        function cancelEdit() {
+            {% if session.get('user') == 'admin' %}
+                window.location.href = '/master/auth';  // 관리자는 회원관리 페이지로
+            {% else %}
+                window.location.href = '/auth/myinfo?mode=info';  // 일반 사용자는 정보 보기 모드로
+            {% endif %}
+        }
+
+        function cancelPasswordChange() {
+            document.getElementById('mode').value = 'edit';
+            document.getElementById('myInfoForm').submit();
+        }
+
+        function confirmPasswordChange() {
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+
+            if (password1 !== password2) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return false;
+            }
+
+            if (password1.length < 8 || password1.length > 20 || 
+                !/[a-zA-Z]/.test(password1) || !/[0-9]/.test(password1)) {
+                alert('비밀번호는 영문+숫자 조합으로 8~20자 사이여야 합니다.');
+                return false;
+            }
+
+            return confirm('비밀번호를 변경하겠습니까?');
+        }
+
+        function confirmDelete() {
+            if (confirm('정말 회원 탈퇴를 하시겠습니까?')) {
+                document.getElementById('mode').value = 'delete';
+                document.getElementById('myInfoForm').submit();
+            }
+        }
+
+        function logout() {
+            window.location.href = '/auth/logout';
+        }
+    </script>
+
+<div>
+    <footer class="footer_copy">
+        <br>
+        <p>copyright 2024 &copy; Daon</p>
+        <br>
+        <p>김미경. 천종일. 하연우. 이기성. 이한세. 김민석. 배휘호</p>
+    </footer>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+<!-- Bootstrap JS (한 번만 포함) -->
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
+</body>
+</html>

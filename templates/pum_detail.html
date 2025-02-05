@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pum['pumname'] }} - 상세 페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='copy.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+
+    <script>
+        function handleCartNavigation() {
+          {% if session.get('user') %}
+            // 로그인된 상태에서 장바구니로 이동
+            const userResponse = confirm("장바구니로 이동하시겠습니까? 추가 쇼핑을 원하실 경우 취소 버튼을 눌러주십시오.");
+            if (userResponse) {
+                document.getElementById('cart-form').submit();
+            } else {
+                // 취소를 누를 경우 메인 인덱스로 이동
+                window.location.href = "{{ url_for('main.index') }}";
+            }
+          {% else %}
+            // 로그인 페이지에 현재 URL(next 파라미터) 전달
+            const currentPage = encodeURIComponent(window.location.href);
+            alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+            window.location.href = "{{ url_for('auth.login') }}?next=" + currentPage;
+          {% endif %}
+        }
+
+        function updateTotalPrice() {
+            var quantity = document.getElementById("quantity").value;
+            var price = {{ pum['price'] | default(0) }};
+            var totalPrice = price * quantity;
+            document.getElementById("total-price").innerText = totalPrice + " 원";
+        }
+    </script>
+</head>
+<body>
+    <!-- Navigation bar -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h1>{{ pum['pumname'] }}</h1>
+
+        <!-- 상품 이미지 -->
+        {% if pum['image_url'] %}
+            <img src="{{ url_for('static', filename='images/' + pum['image_url'].split('/')[-1]) }}" 
+                 alt="{{ pum['pumname'] }} 이미지" style="max-width: 300px;">
+        {% else %}
+            <img src="https://via.placeholder.com/300" alt="이미지 없음" style="max-width: 300px;">
+        {% endif %}
+
+        <p>가격: {{ pum['price'] | default('가격 정보 없음') }} 원</p>
+        <p>설명: {{ pum['content'] | default('설명 정보 없음') }}</p>
+
+        <!-- 수량 입력 및 장바구니 이동 버튼 -->
+        <form id="cart-form" action="{{ url_for('cart.add_to_cart', pum_id=pum['pum_id']) }}" method="post">
+            <div class="form-group">
+                <label for="quantity">수량:</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" onchange="updateTotalPrice()">
+            </div>
+            <h4>총 금액: <span id="total-price">{{ pum['price'] | default(0) }} 원</span></h4>
+            <div class="d-flex mt-4">
+                <a href="{{ url_for('pum.pum_list') }}" class="btn btn-primary me-3">상품 목록으로 돌아가기</a>
+                <button type="button" class="btn btn-success" onclick="handleCartNavigation()">장바구니 담기</button>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <footer class="footer_copy text-center">
+            <br>
+            <p>copyright 2024. &copy; Daon</p>
+            <br>
+            <p>김미경. 천종일. 하연우. 이기성. 이한세. 김민석. 배휘호</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+</body>
+</html>
